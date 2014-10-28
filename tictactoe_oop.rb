@@ -59,13 +59,9 @@ class Game
   WINNING_LINES = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
 
   def initialize
-    puts "Hello, let's play Tic-Tac-Toe!"
-    puts "My name is Jarvis, what's your name?"
-
-    @player = Player.new(gets.chomp)
+    @player = Player.new('Player')
     @computer = Player.new('Jarvis')
     @gameboard = GameBoard.new
-    puts "Nice to meet you #{@player.name}. Let's play!"
   end
 
   def play
