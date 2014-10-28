@@ -81,6 +81,9 @@ class Game
     puts "Thanks for playing #{player.name}!"
   end
 
+  # =========================================================================
+  private
+
   def replay
     puts "Would you like to play again? (Y/N)"
     loop do
@@ -93,7 +96,7 @@ class Game
     end
   end
 
-  def player_marks_board
+   def player_marks_board
     print "Choose a position (from 1 to 9) to place a piece: "
 
     loop do
@@ -110,8 +113,6 @@ class Game
     end
     gameboard.draw
   end
-
-  private
 
   def computer_marks_board
     request = gameboard.empty_tiles.keys.sample
