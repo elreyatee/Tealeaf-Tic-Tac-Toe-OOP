@@ -86,8 +86,10 @@ class Game
 
   def replay
     puts "Would you like to play again? (Y/N)"
+
     loop do
       answer = gets.chomp.downcase
+      
       if !['y', 'n'].include?(answer)
         puts "Invalid selection, please try again."
       else
