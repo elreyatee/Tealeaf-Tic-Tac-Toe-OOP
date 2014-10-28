@@ -2,6 +2,9 @@
 # 10/27/14
 # Tic-Tac-Toe Object Oriented
 
+require 'set'
+require 'pry'
+
 class GameBoard
   attr_accessor :tile
 
@@ -52,6 +55,8 @@ end
 class Game
   attr_accessor :gameboard
   attr_reader :player, :computer
+
+  WINNING_LINES = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
 
   def initialize
     puts "Hello, let's play Tic-Tac-Toe!"
@@ -131,19 +136,13 @@ class Game
   end
 
   def we_have_a_winner
-    case
-    when ((gameboard.tile[1] == 'X' && gameboard.tile[2] == 'X' && gameboard.tile[3] == 'X') || (gameboard.tile[4] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[6] == 'X') || 
-          (gameboard.tile[7] == 'X' && gameboard.tile[8] == 'X' && gameboard.tile[9] == 'X') || (gameboard.tile[7] == 'X' && gameboard.tile[8] == 'X' && gameboard.tile[9] == 'X') ||
-          (gameboard.tile[1] == 'X' && gameboard.tile[4] == 'X' && gameboard.tile[7] == 'X') || (gameboard.tile[2] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[9] == 'X') ||
-          (gameboard.tile[3] == 'X' && gameboard.tile[6] == 'X' && gameboard.tile[9] == 'X') || (gameboard.tile[1] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[9] == 'X') ||
-          (gameboard.tile[3] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[7] == 'X'))
-          return "#{player.name} won!"
-    when ((gameboard.tile[1] == 'O' && gameboard.tile[2] == 'O' && gameboard.tile[3] == 'O') || (gameboard.tile[4] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[6] == 'O') || 
-          (gameboard.tile[7] == 'O' && gameboard.tile[8] == 'O' && gameboard.tile[9] == 'O') || (gameboard.tile[7] == 'O' && gameboard.tile[8] == 'O' && gameboard.tile[9] == 'O') ||
-          (gameboard.tile[1] == 'O' && gameboard.tile[4] == 'O' && gameboard.tile[7] == 'O') || (gameboard.tile[2] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[9] == 'O') ||
-          (gameboard.tile[3] == 'O' && gameboard.tile[6] == 'O' && gameboard.tile[9] == 'O') || (gameboard.tile[1] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[9] == 'O') ||
-          (gameboard.tile[3] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[7] == 'O'))
-          return "#{computer.name} won!"
+    
+    player_moves   = gameboard.tile.select {|k, played_positions| played_positions == 'X'}.keys.to_set
+    computer_moves = gameboard.tile.select {|k, played_positions| played_positions == 'O'}.keys.to_set
+
+    WINNING_LINES.each do |line|
+      return "#{player.name} won!" if line.to_set.subset?(player_moves)
+      return "#{computer.name} won!" if line.to_set.subset?(computer_moves)
     end
     nil
   end
