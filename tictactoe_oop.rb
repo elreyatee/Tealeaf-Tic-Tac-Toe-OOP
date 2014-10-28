@@ -1,33 +1,43 @@
 # Ellery Temple Jr.
-# 10/26/14
+# 10/27/14
 # Tic-Tac-Toe Object Oriented
 
 class GameBoard
-  attr_accessor :board
+  attr_accessor :tile
 
   def initialize
-    @board = {}
-    (1..9).each {|tile| @board[tile] = ' '}
+    @tile = {}
+    (1..9).each {|value| @tile[value] = ' '}
   end
 
   def draw
     system 'clear'
-    puts "     |     |     "
-    puts "  #{board[1]}  |  #{board[2]}  |  #{board[3]}  "
-    puts "     |     |     "
+    puts 
+    puts "     |     |"
+    puts "  #{tile[1]}  |  #{tile[2]}  |  #{tile[3]}  "
+    puts "     |     |"
     puts "-----+-----+-----"
-    puts "     |     |     "
-    puts "  #{board[4]}  |  #{board[5]}  |  #{board[6]}  "
-    puts "     |     |     "
+    puts "     |     |"
+    puts "  #{tile[4]}  |  #{tile[5]}  |  #{tile[6]}  "
+    puts "     |     |"
     puts "-----+-----+-----"
-    puts "     |     |     "
-    puts "  #{board[7]}  |  #{board[8]}  |  #{board[9]}  "
-    puts "     |     |     "
+    puts "     |     |"
+    puts "  #{tile[7]}  |  #{tile[8]}  |  #{tile[9]}  "
+    puts "     |     |"
+    puts 
   end
 
   def clear
     system 'clear'
-    (1..board.length).each {|tiles| board[tiles] = ' '}
+    (1..@tile.length).each {|value| @tile[value] = ' '}
+  end
+
+  def marked?(value)
+    tile[value] != ' '
+  end
+
+  def empty_tiles
+    tile.select {|k, value| value != 'X' && value != 'O'}
   end
 end
 
@@ -37,34 +47,10 @@ class Player
   def initialize(n)
     @name = n
   end
-
-  def move(game)
-    loop do
-      tile_request = gets.chomp.to_i
-
-      if !(1..9).include?(tile_request)
-        puts "Invalid selection, please try again."
-      elsif game.board[tile_request] != ' ' #already marked
-        puts "Tile already marked, please choose another tile."
-      else
-        game.board[tile_request] = 'X'
-        break
-      end
-    end
-    game.draw
-  end
 end
 
-class Computer < Player
-  def move(game)
-    tile_request = game.board.select {|k, v| v != 'X' && v != 'O'}.keys.sample
-    game.board[tile_request] = 'O'
-    game.draw
-  end
-end
-
-class TicTacToe
-  attr_accessor :game
+class Game
+  attr_accessor :gameboard
   attr_reader :player, :computer
 
   def initialize
@@ -72,56 +58,95 @@ class TicTacToe
     puts "My name is Jarvis, what's your name?"
 
     @player = Player.new(gets.chomp)
-    @computer = Computer.new('Jarvis')
-    @game = GameBoard.new
-
+    @computer = Player.new('Jarvis')
+    @gameboard = GameBoard.new
     puts "Nice to meet you #{@player.name}. Let's play!"
-  end
-
-  def check_winner
-    case
-    when ((game.board[1] == 'X' && game.board[2] == 'X' && game.board[3] == 'X') || (game.board[4] == 'X' && game.board[5] == 'X' && game.board[6] == 'X') || 
-          (game.board[7] == 'X' && game.board[8] == 'X' && game.board[9] == 'X') || (game.board[7] == 'X' && game.board[8] == 'X' && game.board[9] == 'X') ||
-          (game.board[1] == 'X' && game.board[4] == 'X' && game.board[7] == 'X') || (game.board[2] == 'X' && game.board[5] == 'X' && game.board[9] == 'X') ||
-          (game.board[3] == 'X' && game.board[6] == 'X' && game.board[9] == 'X') || (game.board[1] == 'X' && game.board[5] == 'X' && game.board[9] == 'X') ||
-          (game.board[3] == 'X' && game.board[5] == 'X' && game.board[7] == 'X'))
-          return "#{player.name} won!"
-    when ((game.board[1] == 'O' && game.board[2] == 'O' && game.board[3] == 'O') || (game.board[4] == 'O' && game.board[5] == 'O' && game.board[6] == 'O') || 
-          (game.board[7] == 'O' && game.board[8] == 'O' && game.board[9] == 'O') || (game.board[7] == 'O' && game.board[8] == 'O' && game.board[9] == 'O') ||
-          (game.board[1] == 'O' && game.board[4] == 'O' && game.board[7] == 'O') || (game.board[2] == 'O' && game.board[5] == 'O' && game.board[9] == 'O') ||
-          (game.board[3] == 'O' && game.board[6] == 'O' && game.board[9] == 'O') || (game.board[1] == 'O' && game.board[5] == 'O' && game.board[9] == 'O') ||
-          (game.board[3] == 'O' && game.board[5] == 'O' && game.board[7] == 'O'))
-          return "#{computer.name} won!"
-    end
-    nil
-  end
-
-  def no_more_moves?
-    game.board.values.all? {|tiles| tiles != ' '} 
-  end
-
-  def clear_game
-    game.clear
   end
 
   def play
     loop do
-      game.draw
+      gameboard.draw
       begin
-        print "Choose a position (from 1 to 9) to place a piece: "
-        player.move(game)
-        computer.move(game)
-        winner = check_winner
-      end until winner || no_more_moves?
+        player_marks_board
+        break if we_have_a_winner
+        computer_marks_board
+        break if we_have_a_winner
+      end until we_have_a_winner || no_more_moves?
 
-      puts winner
+      puts we_have_a_winner
 
-      puts "Would you like to play again? (Y/N)"
-      answer = gets.chomp.downcase
-      answer == 'n' ? break : clear_game
+      replay == 'n' ? break : clear_game
     end
     puts "Thanks for playing #{player.name}!"
   end
+
+  def replay
+    puts "Would you like to play again? (Y/N)"
+    loop do
+      answer = gets.chomp.downcase
+      if !['y', 'n'].include?(answer)
+        puts "Invalid selection, please try again."
+      else
+        return answer
+      end
+    end
+  end
+
+  def player_marks_board
+    print "Choose a position (from 1 to 9) to place a piece: "
+
+    loop do
+      request = gets.chomp.to_i
+
+      if !valid_request?(request)
+        puts "Invalid selection, please try again."
+      elsif gameboard.marked?(request) 
+        puts "Tile already marked, please choose another tile."
+      else
+        gameboard.tile[request] = 'X'
+        break
+      end
+    end
+    gameboard.draw
+  end
+
+  private
+
+  def computer_marks_board
+    request = gameboard.empty_tiles.keys.sample
+    gameboard.tile[request] = 'O'
+    gameboard.draw
+  end
+
+  def valid_request?(request)
+    (1..9).include?(request)
+  end
+
+  def no_more_moves?
+    gameboard.tile.values.all? {|value| value != ' '} 
+  end
+
+  def clear_game
+    gameboard.clear
+  end
+
+  def we_have_a_winner
+    case
+    when ((gameboard.tile[1] == 'X' && gameboard.tile[2] == 'X' && gameboard.tile[3] == 'X') || (gameboard.tile[4] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[6] == 'X') || 
+          (gameboard.tile[7] == 'X' && gameboard.tile[8] == 'X' && gameboard.tile[9] == 'X') || (gameboard.tile[7] == 'X' && gameboard.tile[8] == 'X' && gameboard.tile[9] == 'X') ||
+          (gameboard.tile[1] == 'X' && gameboard.tile[4] == 'X' && gameboard.tile[7] == 'X') || (gameboard.tile[2] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[9] == 'X') ||
+          (gameboard.tile[3] == 'X' && gameboard.tile[6] == 'X' && gameboard.tile[9] == 'X') || (gameboard.tile[1] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[9] == 'X') ||
+          (gameboard.tile[3] == 'X' && gameboard.tile[5] == 'X' && gameboard.tile[7] == 'X'))
+          return "#{player.name} won!"
+    when ((gameboard.tile[1] == 'O' && gameboard.tile[2] == 'O' && gameboard.tile[3] == 'O') || (gameboard.tile[4] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[6] == 'O') || 
+          (gameboard.tile[7] == 'O' && gameboard.tile[8] == 'O' && gameboard.tile[9] == 'O') || (gameboard.tile[7] == 'O' && gameboard.tile[8] == 'O' && gameboard.tile[9] == 'O') ||
+          (gameboard.tile[1] == 'O' && gameboard.tile[4] == 'O' && gameboard.tile[7] == 'O') || (gameboard.tile[2] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[9] == 'O') ||
+          (gameboard.tile[3] == 'O' && gameboard.tile[6] == 'O' && gameboard.tile[9] == 'O') || (gameboard.tile[1] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[9] == 'O') ||
+          (gameboard.tile[3] == 'O' && gameboard.tile[5] == 'O' && gameboard.tile[7] == 'O'))
+          return "#{computer.name} won!"
+    end
+    nil
+  end
 end
 
-TicTacToe.new.play
+Game.new.play
